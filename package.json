@@ -1,0 +1,15 @@
+{
+  "name": "fs-stripe-hooks",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "Formula Stocks Stripe Hooks",
+  "author": "Mark Lyck",
+  "scripts": {
+    "now-start": "node index.js"
+  },
+  "dependencies": {
+    "encoding": "^0.1.12",
+    "express": "^4.16.4",
+    "graphql-request": "^1.8.2"
+  }
+}

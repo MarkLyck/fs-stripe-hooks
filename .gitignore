@@ -1,0 +1,9 @@
+#dependencies
+node_modules/
+
+# deployment
+now.json
+
+# misc
+.DS_Store
+.env
