@@ -5,7 +5,7 @@ Date.prototype.unix = function() {
   return (this.getTime() / 1000) | 0;
 };
 
-const subscriptionHook = await subscription => {
+const subscriptionHook = async subscription => {
   console.log("subscription", subscription);
   if (subscription.customer) {
     // make sure it's a valid subscription and it has a customer on it.
