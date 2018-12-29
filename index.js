@@ -1,40 +1,33 @@
 const express = require("express");
 const app = express();
-
-const getUserByStripeCustomer = require("./getUser");
-const updateUser = require("./updateUser");
-
-Date.prototype.unix = function() {
-  return (this.getTime() / 1000) | 0;
-};
+const subscriptionHook = require("./hooks/subscription");
 
 app.use(require("body-parser").raw({ type: "*/*" }));
-app.post("/subscription", async (req, res) => {
-  res.status(200);
-  res.send("received stripe hook request");
+app.post("/", async (req, res) => {
+  res.status(200); // respond with 200 OK for Stripe to work.
   res.end();
 
-  const subscription = JSON.parse(req.body);
-  console.log("event", subscription);
-  if (subscription.customer) { // make sure it's a subscription and it has a customer on it.
-    const user = await getUserByStripeCustomer(subscription.customer);
-
-    let userType = "subscriber";
-    if (subscription.trial_end > new Date().unix()) userType = "trial";
-
-    if (
-      subscription.canceled_at !== null &&
-      current_period_end < new Date().unix()
-    ) {
-      userType = "canceling";
-    } else if (
-      subscription.canceled_at !== null &&
-      current_period_end > new Date().unix()
-    ) {
-      userType = "canceled";
+  const event = JSON.parse(req.body);
+  // stripe event looks something like this:
+  /*
+    {
+      id: 'evt_1DmfEzEyFfkw1MXRz6VcNDo6',
+      object: 'event',
+      api_version: '2018-11-08',
+      created: 1546080024,
+      data: {
+        object: { >>> DATA YOU WANT <<< }
+        previous_attributes: {...}
+      },
+      livemode: true,
+      pending_webhooks: 1,
+      request: { id: 'req_kGg9wGwg28TiXc', idempotency_key: null },
+      type: 'customer.subscription.updated'
     }
+  */
 
-    updateUser(user.id, subscription, userType);
+  if (event.type === "customer.subscription.updated") {
+    subscriptionHook(event.data.object);
   }
 });
 
