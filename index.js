@@ -15,24 +15,27 @@ app.post("/subscription", async (req, res) => {
   res.end();
 
   const subscription = JSON.parse(req.body);
-  const user = await getUserByStripeCustomer(subscription.customer);
+  console.log("event", subscription);
+  if (subscription.customer) { // make sure it's a subscription and it has a customer on it.
+    const user = await getUserByStripeCustomer(subscription.customer);
 
-  let userType = "subscriber";
-  if (subscription.trial_end > new Date().unix()) userType = "trial";
+    let userType = "subscriber";
+    if (subscription.trial_end > new Date().unix()) userType = "trial";
 
-  if (
-    subscription.canceled_at !== null &&
-    current_period_end < new Date().unix()
-  ) {
-    userType = "canceling";
-  } else if (
-    subscription.canceled_at !== null &&
-    current_period_end > new Date().unix()
-  ) {
-    userType = "canceled";
+    if (
+      subscription.canceled_at !== null &&
+      current_period_end < new Date().unix()
+    ) {
+      userType = "canceling";
+    } else if (
+      subscription.canceled_at !== null &&
+      current_period_end > new Date().unix()
+    ) {
+      userType = "canceled";
+    }
+
+    updateUser(user.id, subscription, userType);
   }
-
-  updateUser(user.id, subscription, userType);
 });
 
 const port = process.env.PORT || 3001;
