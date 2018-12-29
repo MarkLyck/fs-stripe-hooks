@@ -7,22 +7,18 @@ Date.prototype.unix = function() {
 
 const subscriptionHook = async subscription => {
   console.log("subscription", subscription);
-  if (subscription.customer) {
-    // make sure it's a valid subscription and it has a customer on it.
-    const user = await getUserByStripeCustomer(subscription.customer);
+  const { customer, trial_end, canceled_at, current_period_end } = subscription;
+
+  // make sure it's a valid subscription and it has a customer on it.
+  if (customer) {
+    const user = await getUserByStripeCustomer(customer);
 
     let userType = "subscriber";
-    if (subscription.trial_end > new Date().unix()) userType = "trial";
+    if (trial_end > new Date().unix()) userType = "trial";
 
-    if (
-      subscription.canceled_at !== null &&
-      current_period_end < new Date().unix()
-    ) {
+    if (canceled_at !== null && current_period_end < new Date().unix()) {
       userType = "canceling";
-    } else if (
-      subscription.canceled_at !== null &&
-      current_period_end > new Date().unix()
-    ) {
+    } else if (canceled_at !== null && current_period_end > new Date().unix()) {
       userType = "canceled";
     }
 
